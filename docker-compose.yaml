@@ -1,0 +1,76 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+  broker-init:
+    build:
+      context: ./services/broker-initializer
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL}
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  producer-service:
+    build:
+      context: ./services/producer-service
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL}
+
+    ports:
+      - ${PORT}:${PORT}
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      broker-init:
+        condition: service_completed_successfully
+
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      broker-init:
+        condition: service_completed_successfully
+
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:
