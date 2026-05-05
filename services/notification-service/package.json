@@ -28,6 +28,7 @@
     "amqplib": "0.10.5",
     "axios": "^1.16.0",
     "https-proxy-agent": "^9.0.0",
+    "ioredis": "^5.10.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },

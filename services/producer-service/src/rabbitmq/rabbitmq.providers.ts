@@ -1,15 +1,22 @@
 import * as amqp from 'amqplib';
 import type { ConfirmChannel, Connection } from 'amqplib';
 import { RABBITMQ_CHANNEL, RABBITMQ_EXCHANGE } from './rabbitmq.constants';
+import { ConfigService } from '@nestjs/config';
 
 export const rabbitmqProviders = [
   {
     provide: 'RABBITMQ_CONNECTION',
-    useFactory: async (): Promise<Connection> => {
-      return amqp.connect(process.env.RABBITMQ_URL!);
+    inject: [ConfigService],
+    useFactory: async (configService: ConfigService) => {
+      const url = configService.get<string>('RABBITMQ_URL');
+
+      if (!url) {
+        throw new Error('RABBITMQ_URL is not defined');
+      }
+
+      return amqp.connect(url);
     },
   },
-
   {
     provide: RABBITMQ_CHANNEL,
     inject: ['RABBITMQ_CONNECTION'],

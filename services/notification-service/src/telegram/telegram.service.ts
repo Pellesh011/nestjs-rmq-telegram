@@ -7,15 +7,18 @@ const { HttpsProxyAgent } = require("https-proxy-agent");
 export class TelegramService {
   private readonly logger = new Logger(TelegramService.name);
 
-  private readonly token = process.env.TELEGRAM_BOT_TOKEN!;
-  private readonly chatId = process.env.TELEGRAM_CHAT_ID!;
-  constructor(private configService: ConfigService) {}
+  private token;
+  private chatId;
+  private proxyUrl;
+  constructor(private configService: ConfigService) {
+    this.proxyUrl = this.configService.get<string>('TELEGRAM_PROXY_URL');
+    this.chatId = this.configService.get<string>('TELEGRAM_CHAT_ID');
+    this.token = this.configService.get<string>('TELEGRAM_BOT_TOKEN');
+  }
 
   async sendMessage(text: string): Promise<void> {
     try {
-      const proxyUrl = this.configService.get<string>('TELEGRAM_PROXY_URL');
-      const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
-      console.log(proxyUrl)
+      const agent = this.proxyUrl ? new HttpsProxyAgent(this.proxyUrl) : undefined;
       await axios.post(
         `https://api.telegram.org/bot${this.token}/sendMessage`,
         {

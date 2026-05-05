@@ -3,6 +3,8 @@ import { TelegramModule } from './telegram/telegram.module';
 import { NotificationConsumer } from './consumer/notification.service';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { ConfigModule } from '@nestjs/config';
+import { RedisProvider } from './redis/redis.provider';
+import { IdempotencyService } from './redis/idempotency.service';
 
 @Module({
   imports: [
@@ -13,6 +15,6 @@ import { ConfigModule } from '@nestjs/config';
     RabbitMQModule,
     TelegramModule
   ],
-  providers: [NotificationConsumer],
+  providers: [NotificationConsumer, RedisProvider, IdempotencyService],
 })
 export class AppModule {} 

@@ -11,7 +11,7 @@ export class BrokerService implements OnModuleInit {
   private channel!: ConfirmChannel;
 
   private url;
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.url = configService.get<string>('RABBITMQ_URL');
   }
 
