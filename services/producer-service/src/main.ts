@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ProducerModule } from './producer/producer.module';
@@ -19,7 +20,13 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,              // удаляет лишние поля
+      forbidNonWhitelisted: true,   // ошибка если есть лишние поля
+      transform: true,              // автоматически приводит типы
+    }),
+  );
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
