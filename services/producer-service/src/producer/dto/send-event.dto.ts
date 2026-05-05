@@ -6,7 +6,7 @@ export class SendEventDto {
   @IsNotEmpty()
   type!: string;
 
-  @IsObject()
+  @IsString()
   @IsOptional()
-  payload?: Record<string, any>;
+  payload?: string;
 }
