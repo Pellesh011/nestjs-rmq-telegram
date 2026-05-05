@@ -3,8 +3,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import { REDIS_CLIENT } from './redis.provider';
 
-type Status = 'processing' | 'done';
-
 @Injectable()
 export class IdempotencyService {
   constructor(
@@ -12,7 +10,6 @@ export class IdempotencyService {
     private readonly redis: Redis,
   ) {}
 
- 
   private key(eventId: string) {
     return `event:${eventId}`;
   }
@@ -28,6 +25,10 @@ export class IdempotencyService {
     );
 
     return res === 'OK';
+  }
+  
+  async rollback(eventId: string): Promise<void> {
+    await this.redis.del(`event:${eventId}`);
   }
 
   async isDone(eventId: string): Promise<boolean> {
