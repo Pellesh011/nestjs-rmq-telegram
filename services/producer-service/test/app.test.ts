@@ -1,21 +1,33 @@
-// rabbitmq.service.spec.ts
 import { Test } from '@nestjs/testing';
-import { RabbitMQService } from '../src/rabbitmq/rabbitmq.service'
-import { RABBITMQ_CHANNEL, RABBITMQ_EXCHANGE } from '../src/rabbitmq/rabbitmq.constants';
-import type { ConfirmChannel } from 'amqplib';
+import { RabbitMQService } from '../src/rabbitmq/rabbitmq.service';
+import {
+  RABBITMQ_CHANNEL,
+  RABBITMQ_EXCHANGE,
+} from '../src/rabbitmq/rabbitmq.constants';
+import type { Options } from 'amqplib';
+
+type PublishFn = (
+  exchange: string,
+  routingKey: string,
+  content: Buffer,
+  options?: Options.Publish,
+) => boolean;
 
 describe('RabbitMQService', () => {
   let service: RabbitMQService;
-  let channel: jest.Mocked<ConfirmChannel>;
+
+  let publishMock: jest.MockedFunction<PublishFn>;
 
   beforeEach(async () => {
+    publishMock = jest.fn() as jest.MockedFunction<PublishFn>;
+
     const module = await Test.createTestingModule({
       providers: [
         RabbitMQService,
         {
           provide: RABBITMQ_CHANNEL,
           useValue: {
-            publish: jest.fn(),
+            publish: publishMock,
           },
         },
         {
@@ -26,7 +38,6 @@ describe('RabbitMQService', () => {
     }).compile();
 
     service = module.get(RabbitMQService);
-    channel = module.get(RABBITMQ_CHANNEL);
   });
 
   it('should publish event', () => {
@@ -40,18 +51,16 @@ describe('RabbitMQService', () => {
 
     service.publish(event);
 
-    expect(channel.publish).toHaveBeenCalledTimes(1);
+    expect(publishMock).toHaveBeenCalledTimes(1);
 
-    const call = channel.publish.mock.calls[0];
+    const [exchange, routingKey, buffer, options] = publishMock.mock.calls[0];
 
-    expect(call).toBeDefined();
+    expect(exchange).toBeDefined();
+    expect(routingKey).toBeDefined();
 
-    const [, , buffer, options] = call!;
+    expect(options?.persistent).toBe(true);
 
-    expect(options).toBeDefined();
-    expect(options!.persistent).toBe(true);
-
-    const parsed = JSON.parse(buffer.toString());
+    const parsed: typeof event = JSON.parse(buffer.toString());
     expect(parsed).toEqual(event);
   });
 });

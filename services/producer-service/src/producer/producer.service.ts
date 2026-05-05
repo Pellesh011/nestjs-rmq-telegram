@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RabbitMQService } from '../rabbitmq/rabbitmq.service'
+import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 import { BaseEvent } from '../types/event.interface';
 import { SendEventDto } from './dto/send-event.dto';
 import { randomUUID } from 'crypto';
@@ -11,15 +11,14 @@ export class ProducerService {
   constructor(private readonly rabbit: RabbitMQService) {}
 
   publish(dto: SendEventDto) {
-      const event: BaseEvent = {
-        id: randomUUID(),
-        correlationId: randomUUID(),
-        createdAt: new Date().toISOString(),
-        type: dto.type,
-        payload: dto.payload,
-      };
+    const event: BaseEvent = {
+      id: randomUUID(),
+      correlationId: randomUUID(),
+      createdAt: new Date().toISOString(),
+      type: dto.type,
+      payload: dto.payload,
+    };
 
-      return this.rabbit.publish(event);
-    }
-
+    return this.rabbit.publish(event);
+  }
 }

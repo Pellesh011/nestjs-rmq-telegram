@@ -20,7 +20,7 @@ export class BrokerService implements OnModuleInit {
     await this.setupTopology();
 
     this.logger.log('RabbitMQ broker initialized');
-    process.exit(0); 
+    process.exit(0);
   }
 
   private async connect(): Promise<void> {

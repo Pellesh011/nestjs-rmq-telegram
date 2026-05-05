@@ -8,13 +8,13 @@ import { IdempotencyService } from './redis/idempotency.service';
 
 @Module({
   imports: [
-     ConfigModule.forRoot({
+    ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
     RabbitMQModule,
-    TelegramModule
+    TelegramModule,
   ],
   providers: [NotificationConsumer, RedisProvider, IdempotencyService],
 })
-export class AppModule {} 
+export class AppModule {}

@@ -4,14 +4,13 @@ import { ProducerService } from './producer.service';
 import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 import { ConfigModule } from '@nestjs/config';
 
-
 @Module({
   imports: [
-      ConfigModule.forRoot({
+    ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-    RabbitMQModule
+    RabbitMQModule,
   ],
   controllers: [ProducerController],
   providers: [ProducerService],

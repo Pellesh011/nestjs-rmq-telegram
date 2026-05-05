@@ -22,9 +22,9 @@ async function bootstrap() {
   });
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,              // удаляет лишние поля
-      forbidNonWhitelisted: true,   // ошибка если есть лишние поля
-      transform: true,              // автоматически приводит типы
+      whitelist: true, // удаляет лишние поля
+      forbidNonWhitelisted: true, // ошибка если есть лишние поля
+      transform: true, // автоматически приводит типы
     }),
   );
   const port = process.env.PORT || 3000;

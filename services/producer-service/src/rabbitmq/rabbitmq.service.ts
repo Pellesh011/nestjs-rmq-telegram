@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ConfirmChannel } from 'amqplib';
 import { RABBITMQ_CHANNEL, RABBITMQ_EXCHANGE } from './rabbitmq.constants';
-import { BaseEvent } from '../types/event.interface'
+import { BaseEvent } from '../types/event.interface';
 
 @Injectable()
 export class RabbitMQService {
