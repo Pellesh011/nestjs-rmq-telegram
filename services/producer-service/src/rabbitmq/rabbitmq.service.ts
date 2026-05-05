@@ -14,9 +14,9 @@ export class RabbitMQService {
   ) {}
 
   publish(event: BaseEvent): void {
+    const queue = 'notification.queue';
     const buffer = Buffer.from(JSON.stringify(event));
-
-    this.channel.publish(this.exchange, '', buffer, {
+    this.channel.publish(this.exchange, queue, buffer, {
       persistent: true,
       contentType: 'application/json',
     });
