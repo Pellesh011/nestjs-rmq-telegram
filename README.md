@@ -37,5 +37,5 @@ npm run start
 Telegram client → HTTP proxy (Privoxy) → SOCKS5 (Tor) → Telegram API
 Privoxy — преобразует HTTP → SOCKS5
 
-Для обхода блокировок Tor (например, DPI) можно использовать инструмент
+Для обхода блокировок Tor можно использовать
 zapret-discord-youtube
