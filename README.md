@@ -26,4 +26,6 @@ npm run start
 Доступен по роуту /api-docs
 
 ## Telegram api
-Для доступа к telegram api необходим http прокси TELEGRAM_PROXY_URL
+Для обхода блокировок к telegram api необходим http прокси TELEGRAM_PROXY_URL
+Можно использовать бесплатный вариант  privoxy (поднимается локальный http прокси и тунелится через socks5) + tor bundle (socks5).
+https://github.com/Flowseal/zapret-discord-youtube для обхода блокировок тор мостов.
