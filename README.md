@@ -25,7 +25,20 @@ npm run start
 ## Swagger
 Доступен по роуту /api-docs
 
-## Telegram api
-Для обхода блокировок к telegram api необходим http прокси TELEGRAM_PROXY_URL
-Можно использовать бесплатный вариант  privoxy (поднимается локальный http прокси и тунелится через socks5) + tor bundle (socks5).
-https://github.com/Flowseal/zapret-discord-youtube для обхода блокировок тор мостов.
+
+## Telegram api 
+
+Для обхода блокировок доступа к Telegram API можно использовать HTTP-прокси, задав переменную TELEGRAM_PROXY_URL.
+
+Один из вариантов — поднять локальный HTTP-прокси через Privoxy, который будет проксировать трафик в SOCKS5 (например, через Tor).
+
+Схема работы:
+
+Telegram client → HTTP proxy (Privoxy) → SOCKS5 (Tor) → Telegram API
+Privoxy — преобразует HTTP → SOCKS5
+Tor — предоставляет SOCKS5-прокси (обычно 127.0.0.1:9050)
+В TELEGRAM_PROXY_URL указывается адрес Privoxy (например, http://127.0.0.1:8118)
+
+Для обхода блокировок Tor (например, DPI) можно использовать инструменты вроде
+zapret-discord-youtube
+, которые помогают маскировать трафик.
