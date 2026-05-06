@@ -24,3 +24,6 @@ npm run start
 
 ## Swagger
 Доступен по роуту /api-docs
+
+## Telegram api
+Для доступа к telegram api необходим http прокси TELEGRAM_PROXY_URL
