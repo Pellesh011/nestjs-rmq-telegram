@@ -36,9 +36,6 @@ npm run start
 
 Telegram client → HTTP proxy (Privoxy) → SOCKS5 (Tor) → Telegram API
 Privoxy — преобразует HTTP → SOCKS5
-Tor — предоставляет SOCKS5-прокси (обычно 127.0.0.1:9050)
-В TELEGRAM_PROXY_URL указывается адрес Privoxy (например, http://127.0.0.1:8118)
 
-Для обхода блокировок Tor (например, DPI) можно использовать инструменты вроде
+Для обхода блокировок Tor (например, DPI) можно использовать инструмент
 zapret-discord-youtube
-, которые помогают маскировать трафик.
