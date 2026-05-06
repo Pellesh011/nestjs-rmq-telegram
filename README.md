@@ -28,14 +28,4 @@ npm run start
 
 ## Telegram api 
 
-Для обхода блокировок доступа к Telegram API можно использовать HTTP-прокси, задав переменную TELEGRAM_PROXY_URL.
-
-Один из вариантов — поднять локальный HTTP-прокси через Privoxy, который будет проксировать трафик в SOCKS5 (например, через Tor).
-
-Схема работы:
-
-Telegram client → HTTP proxy (Privoxy) → SOCKS5 (Tor) → Telegram API
-Privoxy — преобразует HTTP → SOCKS5
-
-Для обхода блокировок Tor можно использовать
-zapret-discord-youtube
+Для обхода блокировок доступа к Telegram API необходимо использовать HTTP-прокси, задав переменную TELEGRAM_PROXY_URL.
