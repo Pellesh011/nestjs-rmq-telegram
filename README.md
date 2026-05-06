@@ -21,3 +21,6 @@ npm i
 cp .env.example .env
 npm run start
 ```
+
+## Swagger
+Доступен по роуту /api-docs
