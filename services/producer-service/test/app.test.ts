@@ -1,10 +1,8 @@
 import { Test } from '@nestjs/testing';
-import { RabbitMQService } from '../src/rabbitmq/rabbitmq-publisher.service';
-import {
-  RABBITMQ_CHANNEL,
-  RABBITMQ_EXCHANGE,
-} from '../src/rabbitmq/rabbitmq.constants';
+import { RabbitMQPublisherService } from '../src/rabbitmq/rabbitmq-publisher.service';
 import type { Options } from 'amqplib';
+import { RabbitMQConnectionService } from '../src/rabbitmq/rabbitmq-connection.service';
+import { ConfigService } from '@nestjs/config';
 
 type PublishFn = (
   exchange: string,
@@ -14,30 +12,34 @@ type PublishFn = (
 ) => boolean;
 
 describe('RabbitMQService', () => {
-  let service: RabbitMQService;
+  let service: RabbitMQPublisherService;
 
-  let publishMock: jest.MockedFunction<PublishFn>;
+  let channelMock: { publish: jest.MockedFunction<PublishFn>; };
+
+  let connectionServiceMock: { getChannel: jest.MockedFn<PublishFn>; getExchange: jest.MockedFn<PublishFn>; };
 
   beforeEach(async () => {
-    publishMock = jest.fn() as jest.MockedFunction<PublishFn>;
+    channelMock = {
+      publish: jest.fn(),
+    };
+
+    connectionServiceMock = {
+      getChannel: jest.fn().mockReturnValue(channelMock),
+      getExchange: jest.fn().mockReturnValue('test'),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
-        RabbitMQService,
+        RabbitMQPublisherService,
         {
-          provide: RABBITMQ_CHANNEL,
-          useValue: {
-            publish: publishMock,
-          },
+          provide: RabbitMQConnectionService,
+          useValue: connectionServiceMock
         },
-        {
-          provide: RABBITMQ_EXCHANGE,
-          useValue: 'test.exchange',
-        },
+        ConfigService,
       ],
     }).compile();
 
-    service = module.get(RabbitMQService);
+    service = module.get(RabbitMQPublisherService);
   });
 
   it('should publish event', () => {
@@ -51,9 +53,9 @@ describe('RabbitMQService', () => {
 
     service.publish(event);
 
-    expect(publishMock).toHaveBeenCalledTimes(1);
+    expect(channelMock.publish).toHaveBeenCalledTimes(1);
 
-    const [exchange, routingKey, buffer, options] = publishMock.mock.calls[0];
+    const [exchange, routingKey, buffer, options] = channelMock.publish.mock.calls[0];
 
     expect(exchange).toBeDefined();
     expect(routingKey).toBeDefined();
