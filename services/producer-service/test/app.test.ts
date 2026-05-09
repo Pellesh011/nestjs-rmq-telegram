@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { RabbitMQService } from '../src/rabbitmq/rabbitmq.service';
+import { RabbitMQService } from '../src/rabbitmq/rabbitmq-publisher.service';
 import {
   RABBITMQ_CHANNEL,
   RABBITMQ_EXCHANGE,
