@@ -1,11 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ProducerModule } from './producer/producer.module';
+import { AppModule } from './app.module';
+import { RabbitMQBootstrapService } from './rabbitmq/rabbitmq-bootstrap.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ProducerModule);
-
+  const app = await NestFactory.create(AppModule);
+  const bootstrap = app.get(RabbitMQBootstrapService);
+  await bootstrap.init();
   const config = new DocumentBuilder()
     .setTitle('Producer Service API')
     .setDescription('API для публикации событий в RabbitMQ')

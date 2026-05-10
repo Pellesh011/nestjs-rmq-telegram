@@ -1,8 +1,8 @@
 import {
-    Injectable,
-    Logger,
-    OnModuleDestroy,
-    OnModuleInit,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
@@ -10,132 +10,152 @@ import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqplib';
 
 import type {
-    ConfirmChannel,
-    Connection,
-    Options,
+  ConfirmChannel,
+  Connection,
 } from 'amqplib';
 
 @Injectable()
 export class RabbitMQConnectionService
+  implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(
+    RabbitMQConnectionService.name,
+  );
 
-    implements OnModuleInit, OnModuleDestroy {
-    private readonly logger = new Logger(
-        RabbitMQConnectionService.name,
+  private connection: Connection | null = null;
+
+  private channel: ConfirmChannel | null = null;
+
+  private reconnecting = false;
+
+  constructor(
+    private readonly configService: ConfigService,
+  ) { }
+
+  async onModuleInit(): Promise<void> {
+    await this.connect();
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.close();
+  }
+
+  getChannel(): ConfirmChannel {
+    if (!this.channel) {
+      throw new Error(
+        'RabbitMQ channel is not initialized',
+      );
+    }
+
+    return this.channel;
+  }
+
+  async connect(): Promise<void> {
+    const url =
+      this.configService.get<string>(
+        'RABBITMQ_URL',
+      );
+
+    if (!url) {
+      throw new Error(
+        'RABBITMQ_URL is not defined',
+      );
+    }
+
+    this.logger.log(
+      'Connecting to RabbitMQ...',
     );
 
-    private connection: Connection | null = null;
+    this.connection = await amqp.connect(url);
 
-    private publishChannel: ConfirmChannel | null = null;
+    this.connection.on('error', (err) => {
+      this.logger.error(
+        'RabbitMQ connection error',
+        err,
+      );
+    });
 
-    private readonly exchange = 'events.exchange';
+    this.connection.on('close', async () => {
+      this.logger.warn(
+        'RabbitMQ connection closed',
+      );
 
-    private readonly exchangeOptions: Options.AssertExchange =
-        {
-            durable: true,
-        };
+      this.channel = null;
+      this.connection = null;
 
-    constructor(
-        private readonly configService: ConfigService,
-    ) { }
+      await this.reconnect();
+    });
 
-    async onModuleInit(): Promise<void> {
+    this.channel = await this.connection.createConfirmChannel();
+
+    this.channel.on('error', (err) => {
+      this.logger.error(
+        'RabbitMQ channel error',
+        err,
+      );
+    });
+
+    this.channel.on('return', (msg) => {
+      this.logger.warn(
+        `Message returned: ${msg.fields.routingKey}`,
+      );
+    });
+
+    this.logger.log(
+      'RabbitMQ connected',
+    );
+  }
+
+  private async reconnect(): Promise<void> {
+    if (this.reconnecting) {
+      return;
+    }
+
+    this.reconnecting = true;
+
+    while (!this.connection) {
+      try {
+        this.logger.log(
+          'Reconnecting to RabbitMQ...',
+        );
+
         await this.connect();
-    }
-
-    async onModuleDestroy(): Promise<void> {
-        await this.close();
-    }
-
-    getChannel(): ConfirmChannel {
-        if (!this.publishChannel) {
-            throw new Error(
-                'RabbitMQ publish channel is not initialized',
-            );
-        }
-
-        return this.publishChannel;
-    }
-
-    getExchange(): string {
-        return this.exchange;
-    }
-
-    private async connect(): Promise<void> {
-        const url = this.configService.get<string>(
-            'RABBITMQ_URL',
-        );
-
-        if (!url) {
-            throw new Error(
-                'RABBITMQ_URL is not defined',
-            );
-        }
 
         this.logger.log(
-            'connecting to rabbitmq...',
+          'RabbitMQ reconnected',
+        );
+      } catch (err) {
+        this.logger.error(
+          'Reconnect failed',
+          err,
         );
 
-        this.connection = await amqp.connect(url);
-
-        this.connection.on('error', (err) => {
-            this.logger.error(
-                'rabbitmq connection error',
-                err,
-            );
-        });
-
-        this.connection.on('close', () => {
-            this.logger.warn(
-                'rabbitmq connection closed',
-            );
-        });
-
-        this.publishChannel =
-            await this.connection.createConfirmChannel();
-
-        this.publishChannel.on('error', (err) => {
-            this.logger.error(
-                'rabbitmq channel error',
-                err,
-            );
-        });
-
-        this.publishChannel.on('close', () => {
-            this.logger.warn(
-                'rabbitmq channel closed',
-            );
-        });
-
-        await this.publishChannel.assertExchange(
-            this.exchange,
-            'fanout',
-            this.exchangeOptions,
+        await new Promise((resolve) =>
+          setTimeout(resolve, 5000),
         );
-
-        this.logger.log(
-            'rabbitmq connected',
-        );
+      }
     }
 
-    private async close(): Promise<void> {
-        this.logger.log(
-            'closing rabbitmq connection...',
-        );
+    this.reconnecting = false;
+  }
 
-        if (this.publishChannel) {
-            await this.publishChannel.close();
+  private async close(): Promise<void> {
+    this.logger.log(
+      'Closing RabbitMQ connection...',
+    );
 
-            this.publishChannel = null;
-        }
+    try {
+      await this.channel?.close();
+    } catch { }
 
-        if (this.connection) {
-            await this.connection.close();
+    try {
+      await this.connection?.close();
+    } catch { }
 
-            this.connection = null;
-        }
+    this.channel = null;
+    this.connection = null;
 
-        this.logger.log(
-            'rabbitmq connection closed',
-        );
-    }
+    this.logger.log(
+      'RabbitMQ connection closed',
+    );
+  }
 }

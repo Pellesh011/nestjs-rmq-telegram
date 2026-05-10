@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { RabbitMQPublisherService } from '../src/rabbitmq/rabbitmq-publisher.service';
+import { RabbitMQPublisherService } from '../src/rabbitmq/base-rabbitmq-publisher.service';
 import type { Options } from 'amqplib';
 import { RabbitMQConnectionService } from '../src/rabbitmq/rabbitmq-connection.service';
 import { ConfigService } from '@nestjs/config';

@@ -22,18 +22,6 @@ services:
       retries: 5
 
     restart: unless-stopped
-  broker-init:
-    build:
-      context: ./services/broker-initializer
-    env_file:
-      - .env
-    environment:
-      RABBITMQ_URL: ${RABBITMQ_URL}
-
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    restart: on-failure
 
   producer-service:
     build:
@@ -49,14 +37,12 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      broker-init:
-        condition: service_completed_successfully
 
     restart: unless-stopped
 
   notification-service:
     build:
-      context: ./services/notification-service
+      context: ./services/consumer-service
     env_file:
       - .env
     environment:
@@ -69,8 +55,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      broker-init:
-        condition: service_completed_successfully
 
     restart: unless-stopped
   redis:

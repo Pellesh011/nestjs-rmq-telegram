@@ -1,17 +1,24 @@
-import { Module, Global } from '@nestjs/common';
-import { RabbitMQPublisherService } from './rabbitmq-publisher.service';
+import { Global, Module } from '@nestjs/common';
+
 import { RabbitMQConnectionService } from './rabbitmq-connection.service';
-import { QueuePublisherService } from '../producer/abstracts/queue-service.abstract';
+
+import { RabbitMQTopologyService } from './rabbitmq-topology.service';
+import { RabbitMQBootstrapService } from './rabbitmq-bootstrap.service';
 
 @Global()
 @Module({
   providers: [
-    RabbitMQPublisherService,
     RabbitMQConnectionService,
-    {
-      provide: QueuePublisherService,
-      useExisting: RabbitMQPublisherService,
-    },],
-  exports: [RabbitMQPublisherService, RabbitMQConnectionService, QueuePublisherService],
+    RabbitMQTopologyService,
+    RabbitMQBootstrapService,
+    RabbitMQTopologyService
+  ],
+
+  exports: [
+    RabbitMQConnectionService,
+    RabbitMQTopologyService,
+    RabbitMQBootstrapService,
+    RabbitMQTopologyService
+  ],
 })
-export class RabbitMQModule { }
+export class RabbitMQModule {}
